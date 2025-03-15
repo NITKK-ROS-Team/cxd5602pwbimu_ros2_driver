@@ -4,7 +4,7 @@ from glob import glob
 
 from setuptools import setup
 
-package_name = 'cxd5602pwbimu_bringup'
+package_name = 'cxd5602pwbimu_driver_bringup'
 
 setup(
     name=package_name,

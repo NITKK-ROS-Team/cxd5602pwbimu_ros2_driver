@@ -25,8 +25,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ____CXD5602PWBIMU_CRC8_HPP__
-#define ____CXD5602PWBIMU_CRC8_HPP__
+#ifndef ____CXD5602PWBIMU_DRIVER_NODE_CRC8_HPP__
+#define ____CXD5602PWBIMU_DRIVER_NODE_CRC8_HPP__
 
 #include <cstdint>
 
@@ -38,7 +38,7 @@ typedef uint32_t crc_size_t;
 #define CRC8_REV_OUT                false
 
 
-namespace cxd5602pwbimu_node
+namespace cxd5602pwbimu_driver_node
 {
 
 class CRC8
@@ -129,6 +129,6 @@ private:
 };
 
 
-}  // namespace cxd5602pwbimu_node
+}  // namespace cxd5602pwbimu_driver_node
 
-#endif  // ____CXD5602PWBIMU_CRC8_HPP__
+#endif  // ____CXD5602PWBIMU_DRIVER_NODE_CRC8_HPP__

@@ -4,8 +4,8 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-#ifndef ____CXD5602PWBIMU_CXD5602PWBIMU_NODE_HPP__
-#define ____CXD5602PWBIMU_CXD5602PWBIMU_NODE_HPP__
+#ifndef ____CXD5602PWBIMU_DRIVER_NODE_CXD5602PWBIMU_DRIVER_NODE_HPP__
+#define ____CXD5602PWBIMU_DRIVER_NODE_CXD5602PWBIMU_DRIVER_NODE_HPP__
 
 #include <functional>
 #include <h6x_serial_interface/h6x_serial_interface.hpp>
@@ -14,10 +14,10 @@
 
 #include "imu_class.hpp"
 
-namespace cxd5602pwbimu_node
+namespace cxd5602pwbimu_driver_node
 {
 
-class Cxd5602pwbimuNode : public rclcpp::Node
+class Cxd5602pwbimuDriverNode : public rclcpp::Node
 {
 private:
   using PortHandler = h6x_serial_interface::PortHandler;
@@ -32,14 +32,14 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
 public:
-  Cxd5602pwbimuNode() = delete;
-  explicit Cxd5602pwbimuNode(const rclcpp::NodeOptions &);
-  ~Cxd5602pwbimuNode();
+  Cxd5602pwbimuDriverNode() = delete;
+  explicit Cxd5602pwbimuDriverNode(const rclcpp::NodeOptions &);
+  ~Cxd5602pwbimuDriverNode();
 
 private:
   void timerCallback();
 
 
 };
-}   // namespace cxd5602pwbimu_node
-#endif  // ____CXD5602PWBIMU_CXD5602PWBIMU_NODE_HPP__
+}   // namespace cxd5602pwbimu_driver_node
+#endif  // ____CXD5602PWBIMU_DRIVER_NODE_CXD5602PWBIMU_DRIVER_NODE_HPP__

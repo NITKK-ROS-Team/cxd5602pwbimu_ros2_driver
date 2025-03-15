@@ -31,6 +31,8 @@ jobs:
         with:
           target-ros2-distro: ${{ matrix.ros_distribution }}
           import-token: ${{ secrets.GITHUB_TOKEN }}
+          vcs-repo-file-url: build_depends.repos
           package-name: |
-            cxd5602pwbimu_bringup
-            cxd5602pwbimu_node
+            cxd5602pwbimu_driver
+            cxd5602pwbimu_driver_bringup
+            cxd5602pwbimu_driver_node

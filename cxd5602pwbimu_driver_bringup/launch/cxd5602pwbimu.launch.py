@@ -3,11 +3,11 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    rviz_config_path = get_package_share_directory('cxd5602pwbimu_bringup') + '/rviz/rvizconfig.rviz'
+    rviz_config_path = get_package_share_directory('cxd5602pwbimu_driver_bringup') + '/rviz/rvizconfig.rviz'
     cxp_node = Node(
-        package='cxd5602pwbimu_node',
-        executable='cxd5602pwbimu_node_exec',
-        name='cxd5602pwbimu_node',
+        package='cxd5602pwbimu_driver_node',
+        executable='cxd5602pwbimu_driver_node_exec',
+        name='cxd5602pwbimu_driver_node',
         output='screen',
         parameters=[{'device': '/dev/ttyUSB0'}]
     )

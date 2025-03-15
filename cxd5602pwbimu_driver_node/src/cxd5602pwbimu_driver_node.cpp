@@ -4,12 +4,12 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-#include "cxd5602pwbimu/cxd5602pwbimu_node.hpp"
+#include "cxd5602pwbimu_driver_node/cxd5602pwbimu_driver_node.hpp"
 
-namespace cxd5602pwbimu_node
+namespace cxd5602pwbimu_driver_node
 {
 
-Cxd5602pwbimuNode::Cxd5602pwbimuNode(const rclcpp::NodeOptions & options)
+Cxd5602pwbimuDriverNode::Cxd5602pwbimuDriverNode(const rclcpp::NodeOptions & options)
 : rclcpp::Node("imu_publisher", options),
   port_handler_(this->declare_parameter<std::string>("dev", "/dev/ttyUSB0")),
   time_offset_(0),
@@ -34,15 +34,15 @@ Cxd5602pwbimuNode::Cxd5602pwbimuNode(const rclcpp::NodeOptions & options)
   }
 
   this->timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(spin_ms), std::bind(&Cxd5602pwbimuNode::timerCallback, this));
+    std::chrono::milliseconds(spin_ms), std::bind(&Cxd5602pwbimuDriverNode::timerCallback, this));
 }
 
-Cxd5602pwbimuNode::~Cxd5602pwbimuNode()
+Cxd5602pwbimuDriverNode::~Cxd5602pwbimuDriverNode()
 {
   this->port_handler_.close();
 }
 
-void Cxd5602pwbimuNode::timerCallback()
+void Cxd5602pwbimuDriverNode::timerCallback()
 {
   this->timer_->cancel();
 
@@ -81,4 +81,4 @@ void Cxd5602pwbimuNode::timerCallback()
 }
 
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(cxd5602pwbimu_node::Cxd5602pwbimuNode)
+RCLCPP_COMPONENTS_REGISTER_NODE(cxd5602pwbimu_driver_node::Cxd5602pwbimuDriverNode)

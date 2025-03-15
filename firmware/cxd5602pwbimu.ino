@@ -14,7 +14,7 @@
 #include "CRC8.h"
 #include "CRC.h"
 
-#define CXD5602PWBIMU_DEVPATH      "/dev/imu0"
+#define CXD5602PWBIMU_DRIVER_DEVPATH      "/dev/imu0"
 #define MAX_NFIFO 4
 const char SERIAL_HEADER = 'X';
 
@@ -68,7 +68,7 @@ void setup() {
   int devfd;
   board_cxd5602pwbimu_initialize(5);
 
-  devfd = open(CXD5602PWBIMU_DEVPATH, O_RDONLY);
+  devfd = open(CXD5602PWBIMU_DRIVER_DEVPATH, O_RDONLY);
   start_sensing(devfd, 960, 16, 4000, MAX_NFIFO);
   drop_50msdata(devfd, 960);
   delay(2000);

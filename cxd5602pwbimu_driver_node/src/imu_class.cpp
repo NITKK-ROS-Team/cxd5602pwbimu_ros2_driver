@@ -4,9 +4,9 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-#include "cxd5602pwbimu/imu_class.hpp"
+#include "cxd5602pwbimu_driver_node/imu_class.hpp"
 
-namespace cxd5602pwbimu_node
+namespace cxd5602pwbimu_driver_node
 {
 
 ImuClass::ImuClass()
@@ -71,4 +71,4 @@ std::tuple<std::array<float, 3>, std::array<float, 3>, uint32_t,
   return {linear_acceleration_, angular_velocity_, sec_, msec_};
 }
 
-}  // namespace cxd5602pwbimu_node
+}  // namespace cxd5602pwbimu_driver_node

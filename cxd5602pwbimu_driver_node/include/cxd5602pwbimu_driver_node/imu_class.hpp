@@ -4,8 +4,8 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-#ifndef ____CXD5602PWBIMU_IMU_CLASS_HPP__
-#define ____CXD5602PWBIMU_IMU_CLASS_HPP__
+#ifndef ____CXD5602PWBIMU_DRIVER_NODE_IMU_CLASS_HPP__
+#define ____CXD5602PWBIMU_DRIVER_NODE_IMU_CLASS_HPP__
 
 #include <array>
 #include <cstdint>
@@ -16,7 +16,7 @@
 
 #include "crc8.hpp"
 
-namespace cxd5602pwbimu_node
+namespace cxd5602pwbimu_driver_node
 {
 
 class ImuClass
@@ -35,6 +35,6 @@ private:
   uint32_t msec_;
 };
 
-}  // namespace cxd5602pwbimu_node
+}  // namespace cxd5602pwbimu_driver_node
 
-#endif  // ____CXD5602PWBIMU_IMU_CLASS_HPP__
+#endif  // ____CXD5602PWBIMU_DRIVER_NODE_IMU_CLASS_HPP__

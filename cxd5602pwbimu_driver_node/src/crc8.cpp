@@ -25,9 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "cxd5602pwbimu/imu_class.hpp"
+#include "cxd5602pwbimu_driver_node/imu_class.hpp"
 
-namespace cxd5602pwbimu_node
+namespace cxd5602pwbimu_driver_node
 {
 
 CRC8::CRC8(
