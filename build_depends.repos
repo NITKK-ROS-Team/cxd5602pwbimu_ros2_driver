@@ -1,0 +1,5 @@
+repositories:
+  h6x_serial_interface:
+    type: git
+    url: https://github.com/HarvestX/h6x_serial_interface.git
+    version: humble
