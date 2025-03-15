@@ -32,4 +32,5 @@ jobs:
           target-ros2-distro: ${{ matrix.ros_distribution }}
           import-token: ${{ secrets.GITHUB_TOKEN }}
           package-name: |
+            cxd5602pwbimu_bringup
             cxd5602pwbimu_node
