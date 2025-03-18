@@ -68,9 +68,9 @@ void Cxd5602pwbimuDriverNode::timerCallback()
     msg->linear_acceleration.y = linear_acceleration[1];
     msg->linear_acceleration.z = linear_acceleration[2];
 
-    msg->angular_velocity.x = angular_velocity[0];
-    msg->angular_velocity.y = angular_velocity[1];
-    msg->angular_velocity.z = angular_velocity[2];
+    msg->angular_velocity.x = angular_velocity[0] * 0.5;
+    msg->angular_velocity.y = angular_velocity[1] * 0.5;
+    msg->angular_velocity.z = angular_velocity[2] * 0.5;
 
     publisher_->publish(std::move(msg));
   }
