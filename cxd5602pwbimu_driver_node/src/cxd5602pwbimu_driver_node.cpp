@@ -21,6 +21,7 @@ Cxd5602pwbimuDriverNode::Cxd5602pwbimuDriverNode(const rclcpp::NodeOptions & opt
 
   imu_ = std::make_unique<ImuClass>();
   publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("/imu/data_raw", rclcpp::SensorDataQoS());
+  temp_publisher_ = this->create_publisher<sensor_msgs::msg::Temperature>("/imu/temperature", rclcpp::SensorDataQoS());
 
   if (!port_handler_.configure(baudrate, timeout_ms)) {
     RCLCPP_ERROR(get_logger(), "Failed to configure serial port");
@@ -49,17 +50,16 @@ void Cxd5602pwbimuDriverNode::startSerialThread()
 {
   recv_thread_ = std::thread([this]() {
     std::string buf;
-    buf.reserve(35);
+    buf.reserve(39);
     char c;
 
     while (running_) {
-        char c;
         int n = port_handler_.read(&c, 1);
         if (n != 1) continue;
 
         buf.push_back(c);
 
-        if (buf.size() == 35) {
+        if (buf.size() == 39) {
             if (buf.back() == delimiter_) {
                 processPacket(reinterpret_cast<const uint8_t*>(buf.data()), buf.size());
             } else {
@@ -84,7 +84,7 @@ void Cxd5602pwbimuDriverNode::processPacket(const uint8_t* data, size_t size)
     return;
   }
 
-  auto [linear_acc, angular_vel, sec, msec] = imu_->get_data();
+  auto [linear_acc, angular_vel, temperature, sec, msec] = imu_->get_data();
 
   auto msg = sensor_msgs::msg::Imu();
 
@@ -96,15 +96,25 @@ void Cxd5602pwbimuDriverNode::processPacket(const uint8_t* data, size_t size)
   msg.header.stamp.sec = sec + time_offset_;
   msg.header.stamp.nanosec = msec * 1000000;
 
-  msg.linear_acceleration.x = linear_acc[0];
-  msg.linear_acceleration.y = linear_acc[1];
+  msg.linear_acceleration.x = -linear_acc[0];
+  msg.linear_acceleration.y = -linear_acc[1];
   msg.linear_acceleration.z = linear_acc[2];
 
   msg.angular_velocity.x = angular_vel[0] * 0.5;
   msg.angular_velocity.y = angular_vel[1] * 0.5;
   msg.angular_velocity.z = angular_vel[2] * 0.5;
 
+  msg.orientation_covariance[0] = -1;
+  msg.linear_acceleration_covariance[0] = -1;
+  msg.angular_velocity_covariance[0] = -1;
+
   publisher_->publish(msg);
+
+  auto temp_msg = sensor_msgs::msg::Temperature();
+  temp_msg.header = msg.header;
+  temp_msg.temperature = temperature;
+  temp_msg.variance = 0.0;
+  temp_publisher_->publish(temp_msg);
 }
 
 }

@@ -80,23 +80,27 @@ void setup() {
 
   float linear_acceleration[3] = {0};
   float angular_velocity[3] = {0};
+  float temperature = 0;
   while(1) {
     int ret = read(devfd, g_data, sizeof(g_data[0]) * MAX_NFIFO);
     if(ret == sizeof(g_data[0]) * MAX_NFIFO) {
       for(int i=0; i<MAX_NFIFO; i++) {
-        linear_acceleration[0] = -g_data[i].ax;
-        linear_acceleration[1] = -g_data[i].ay;
-        linear_acceleration[2] = -g_data[i].az;
-        angular_velocity[0] = -g_data[i].gx; 
-        angular_velocity[1] = -g_data[i].gy; 
+        linear_acceleration[0] = g_data[i].ax;
+        linear_acceleration[1] = g_data[i].ay;
+        linear_acceleration[2] = g_data[i].az;
+        angular_velocity[0] = g_data[i].gx; 
+        angular_velocity[1] = g_data[i].gy; 
         angular_velocity[2] = g_data[i].gz;
+        temperature = g_data[i].temp;
 
         float2byte f2b_linear_acceleration[3];
         float2byte f2b_angular_velocity[3];
+        float2byte f2b_temperature;
         for(int j=0; j<3; j++) {
           f2b_linear_acceleration[j].f = linear_acceleration[j];
           f2b_angular_velocity[j].f = angular_velocity[j];
         }
+        f2b_temperature.f = temperature;
         
         get_time(sec, msec);
 
@@ -106,6 +110,7 @@ void setup() {
         crc.add((uint8_t*)&msec, 4);
         crc.add((uint8_t*)&linear_acceleration, 12);
         crc.add((uint8_t*)&angular_velocity, 12);
+        crc.add((uint8_t*)&temperature, 4);
         uint8_t crc8 = crc.calc();
 
         printf("%c", SERIAL_HEADER);
@@ -124,6 +129,9 @@ void setup() {
           for(int j=0; j<4; j++) {
             printf("%c", f2b.b[j]);
           }
+        }
+        for(int i=0;i<4;i++) {
+          printf("%c", f2b_temperature.b[i]);
         }
         printf("%c\n", crc8);
       }

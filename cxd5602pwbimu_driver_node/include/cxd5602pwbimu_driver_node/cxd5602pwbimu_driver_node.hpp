@@ -13,6 +13,7 @@
 #include <h6x_serial_interface/h6x_serial_interface.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/temperature.hpp>
 
 #include "imu_class.hpp"
 
@@ -29,6 +30,7 @@ private:
 
   std::unique_ptr<ImuClass> imu_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr publisher_;
+  rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr temp_publisher_;
 
   std::thread recv_thread_;
   std::atomic<bool> running_;

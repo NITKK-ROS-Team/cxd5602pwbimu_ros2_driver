@@ -12,12 +12,15 @@ namespace cxd5602pwbimu_driver_node
 ImuClass::ImuClass()
 : linear_acceleration_({0.0, 0.0, 0.0}),
   angular_velocity_({0.0, 0.0, 0.0}),
+  temperature_(0.0),
   sec_(0),
   msec_(0) {}
 
 bool ImuClass::set_data(const uint8_t * data_bytes, size_t length)
 {
-  if (length != 35) {
+  const size_t expected_length = 39;
+  const size_t crc_index = expected_length - 2;
+  if (length != expected_length) {
     std::cerr << "Invalid data length: " << length << std::endl;
     return false;
   }
@@ -27,11 +30,11 @@ bool ImuClass::set_data(const uint8_t * data_bytes, size_t length)
   }
 
   CRC8 hash_obj(0x07);
-  hash_obj.add(data_bytes, 33);
+  hash_obj.add(data_bytes, crc_index);
 
-  if (hash_obj.calc() != data_bytes[33]) {
+  if (hash_obj.calc() != data_bytes[crc_index]) {
     std::cerr << "CRC mismatch: calculated " << static_cast<int>(hash_obj.calc())
-              << ", received " << static_cast<int>(data_bytes[33]) << std::endl;
+              << ", received " << static_cast<int>(data_bytes[crc_index]) << std::endl;
     return false;
   }
 
@@ -53,6 +56,10 @@ bool ImuClass::set_data(const uint8_t * data_bytes, size_t length)
     offset += 4;
   }
 
+  float temp;
+  std::memcpy(&temp, &data_bytes[offset], sizeof(float));
+  temperature_ = temp;
+
   return true;
 }
 
@@ -67,12 +74,13 @@ void ImuClass::print_data() const
             << angular_velocity_[0] << ", "
             << angular_velocity_[1] << ", "
             << angular_velocity_[2] << "]" << std::endl;
+  std::cout << "Temperature: " << temperature_ << " C" << std::endl;
 }
 
-std::tuple<std::array<float, 3>, std::array<float, 3>, uint32_t,
+std::tuple<std::array<float, 3>, std::array<float, 3>, float, uint32_t,
   uint32_t> ImuClass::get_data() const
 {
-  return {linear_acceleration_, angular_velocity_, sec_, msec_};
+  return {linear_acceleration_, angular_velocity_, temperature_, sec_, msec_};
 }
 
 }  // namespace cxd5602pwbimu_driver_node
