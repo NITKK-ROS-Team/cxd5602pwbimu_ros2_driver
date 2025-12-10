@@ -65,12 +65,14 @@ static int drop_50msdata(int fd, int samprate)
 }
 
 void setup() {
+  Serial.begin(1000000);
+
   int devfd;
   board_cxd5602pwbimu_initialize(5);
 
   devfd = open(CXD5602PWBIMU_DRIVER_DEVPATH, O_RDONLY);
-  start_sensing(devfd, 960, 16, 4000, MAX_NFIFO);
-  drop_50msdata(devfd, 960);
+  start_sensing(devfd, 1920, 16, 4000, MAX_NFIFO);
+  drop_50msdata(devfd, 1920);
   delay(2000);
 
   int32_t sec = 0;

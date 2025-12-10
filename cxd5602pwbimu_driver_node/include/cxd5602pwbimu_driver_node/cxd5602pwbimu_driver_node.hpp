@@ -8,6 +8,8 @@
 #define ____CXD5602PWBIMU_DRIVER_NODE_CXD5602PWBIMU_DRIVER_NODE_HPP__
 
 #include <functional>
+#include <thread>
+#include <atomic>
 #include <h6x_serial_interface/h6x_serial_interface.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
@@ -25,11 +27,11 @@ private:
   uint32_t time_offset_;
   const char delimiter_;
 
-  rclcpp::TimerBase::SharedPtr read_timer_;
-
   std::unique_ptr<ImuClass> imu_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr publisher_;
-  rclcpp::TimerBase::SharedPtr timer_;
+
+  std::thread recv_thread_;
+  std::atomic<bool> running_;
 
 public:
   Cxd5602pwbimuDriverNode() = delete;
@@ -37,9 +39,11 @@ public:
   ~Cxd5602pwbimuDriverNode();
 
 private:
-  void timerCallback();
+  void startSerialThread();
 
-
+  void processPacket(const uint8_t* data, size_t size);
 };
+
 }   // namespace cxd5602pwbimu_driver_node
+
 #endif  // ____CXD5602PWBIMU_DRIVER_NODE_CXD5602PWBIMU_DRIVER_NODE_HPP__

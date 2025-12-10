@@ -9,7 +9,7 @@ def generate_launch_description():
         executable='cxd5602pwbimu_driver_node_exec',
         name='cxd5602pwbimu_driver_node',
         output='screen',
-        parameters=[{'device': '/dev/ttyUSB0'}]
+        parameters=[{'device': '/dev/ttyUSB0', 'baudrate': 1000000}]
     )
 
     imu_filter_node = Node(

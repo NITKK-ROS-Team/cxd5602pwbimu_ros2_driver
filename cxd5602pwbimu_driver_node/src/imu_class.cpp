@@ -17,10 +17,12 @@ ImuClass::ImuClass()
 
 bool ImuClass::set_data(const uint8_t * data_bytes, size_t length)
 {
-  if (length != 36) {
+  if (length != 35) {
+    std::cerr << "Invalid data length: " << length << std::endl;
     return false;
   }
   if (data_bytes[0] != 'X') {
+    std::cerr << "Invalid start byte: " << static_cast<int>(data_bytes[0]) << std::endl;
     return false;
   }
 
@@ -28,6 +30,8 @@ bool ImuClass::set_data(const uint8_t * data_bytes, size_t length)
   hash_obj.add(data_bytes, 33);
 
   if (hash_obj.calc() != data_bytes[33]) {
+    std::cerr << "CRC mismatch: calculated " << static_cast<int>(hash_obj.calc())
+              << ", received " << static_cast<int>(data_bytes[33]) << std::endl;
     return false;
   }
 
