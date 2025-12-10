@@ -96,12 +96,12 @@ void Cxd5602pwbimuDriverNode::processPacket(const uint8_t* data, size_t size)
   msg.header.stamp.sec = sec + time_offset_;
   msg.header.stamp.nanosec = msec * 1000000;
 
-  msg.linear_acceleration.x = -linear_acc[0];
-  msg.linear_acceleration.y = -linear_acc[1];
-  msg.linear_acceleration.z = linear_acc[2];
+  msg.linear_acceleration.x = linear_acc[0];
+  msg.linear_acceleration.y = linear_acc[1];
+  msg.linear_acceleration.z = -linear_acc[2];
 
-  msg.angular_velocity.x = angular_vel[0] * 0.5;
-  msg.angular_velocity.y = angular_vel[1] * 0.5;
+  msg.angular_velocity.x = -angular_vel[0] * 0.5;
+  msg.angular_velocity.y = -angular_vel[1] * 0.5;
   msg.angular_velocity.z = angular_vel[2] * 0.5;
 
   msg.orientation_covariance[0] = -1;
