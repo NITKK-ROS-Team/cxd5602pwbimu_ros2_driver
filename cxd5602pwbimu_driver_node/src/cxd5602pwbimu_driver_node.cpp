@@ -14,6 +14,7 @@ Cxd5602pwbimuDriverNode::Cxd5602pwbimuDriverNode(const rclcpp::NodeOptions & opt
   port_handler_(this->declare_parameter<std::string>("dev", "/dev/ttyUSB0")),
   time_offset_(0),
   delimiter_(this->declare_parameter<char>("delimiter", '\n')),
+  start_byte_(this->declare_parameter<char>("start_byte", 'X')),
   running_(true)
 {
   const int baudrate = this->declare_parameter<int>("baudrate", 115200);
@@ -55,9 +56,17 @@ void Cxd5602pwbimuDriverNode::startSerialThread()
 
     while (running_) {
         int n = port_handler_.read(&c, 1);
-        if (n != 1) continue;
+        if (n != 1) {
+            this_thread::sleep_for(std::chrono::milliseconds(1));
+            continue;
+        }
 
         buf.push_back(c);
+
+        if (buf.front() != start_byte_) {
+            buf.erase(buf.begin());
+            continue;
+        }
 
         if (buf.size() == 39) {
             if (buf.back() == delimiter_) {
@@ -66,9 +75,9 @@ void Cxd5602pwbimuDriverNode::startSerialThread()
                 char skip;
                 do {
                     if (port_handler_.read(&skip, 1) != 1) break;
-                    RCLCPP_INFO(get_logger(), "Skipping byte: %c %d", skip, skip==delimiter_);
+                    RCLCPP_DEBUG(get_logger(), "Skipping byte: %c %d", skip, skip==delimiter_);
                 } while (skip != delimiter_);
-                RCLCPP_INFO(get_logger(), "Resynchronized at delimiter");
+                RCLCPP_WARN_THROTTLE(get_logger(), *this->get_clock(), 5000, "Resynchronized at delimiter");
             }
             buf.clear();
         }
@@ -113,7 +122,7 @@ void Cxd5602pwbimuDriverNode::processPacket(const uint8_t* data, size_t size)
   auto temp_msg = sensor_msgs::msg::Temperature();
   temp_msg.header = msg.header;
   temp_msg.temperature = temperature;
-  temp_msg.variance = 0.0;
+  temp_msg.variance = -1;
   temp_publisher_->publish(temp_msg);
 }
 

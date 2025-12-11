@@ -26,7 +26,7 @@ private:
   using PortHandler = h6x_serial_interface::PortHandler;
   PortHandler port_handler_;
   uint32_t time_offset_;
-  const char delimiter_;
+  const char delimiter_, start_byte_;
 
   std::unique_ptr<ImuClass> imu_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr publisher_;

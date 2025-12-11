@@ -31,6 +31,7 @@ public:
 private:
   std::array<float, 3> linear_acceleration_;
   std::array<float, 3> angular_velocity_;
+  const char delimiter_, start_byte_;
   float temperature_;
   uint32_t sec_;
   uint32_t msec_;

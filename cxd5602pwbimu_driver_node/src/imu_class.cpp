@@ -14,7 +14,9 @@ ImuClass::ImuClass()
   angular_velocity_({0.0, 0.0, 0.0}),
   temperature_(0.0),
   sec_(0),
-  msec_(0) {}
+  msec_(0),
+  delimiter_('\n'),
+  start_byte_('X') {}
 
 bool ImuClass::set_data(const uint8_t * data_bytes, size_t length)
 {
@@ -24,8 +26,12 @@ bool ImuClass::set_data(const uint8_t * data_bytes, size_t length)
     std::cerr << "Invalid data length: " << length << std::endl;
     return false;
   }
-  if (data_bytes[0] != 'X') {
+  if (data_bytes[0] != start_byte_) {
     std::cerr << "Invalid start byte: " << static_cast<int>(data_bytes[0]) << std::endl;
+    return false;
+  }
+  if (data_bytes[expected_length - 1] != delimiter_) {
+    std::cerr << "Invalid end byte: " << static_cast<int>(data_bytes[expected_length - 1]) << std::endl;
     return false;
   }
 

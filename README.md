@@ -9,8 +9,8 @@ High speed version up to 1.92 kHz
 Follow the instructions on the official SPRESENSE Arduino IDE setup guide:
 [https://developer.sony.com/spresense/development-guides/arduino_set_up_ja](https://developer.sony.com/spresense/development-guides/arduino_set_up_ja)
 
-### flash ino sketch
-`firmware/cxd5602pwbimu_imu/cxd5602pwbimu_imu.ino` to SPRESENSE main board using Arduino IDE.
+### 2. Flash INO Sketch
+`firmware/cxd5602pwbimu/cxd5602pwbimu.ino` to SPRESENSE main board using Arduino IDE.
 
 ## Build
 ```bash
@@ -23,5 +23,5 @@ colcon build --symlink-install
 ## Launch
 ```bash
 source install/setup.bash
-ros2 launch cxd5602pwbimu_driver_bringup cxd5602pwbimu_driver_launch.py
+ros2 launch cxd5602pwbimu_driver_bringup cxd5602pwbimu.launch.py
 ```
