@@ -26,11 +26,13 @@ public:
 
   bool set_data(const uint8_t *, size_t);
   void print_data() const;
-  std::tuple<std::array<float, 3>, std::array<float, 3>, uint32_t, uint32_t> get_data() const;
+  std::tuple<std::array<float, 3>, std::array<float, 3>, float, uint32_t, uint32_t> get_data() const;
 
 private:
   std::array<float, 3> linear_acceleration_;
   std::array<float, 3> angular_velocity_;
+  const char delimiter_, start_byte_;
+  float temperature_;
   uint32_t sec_;
   uint32_t msec_;
 };

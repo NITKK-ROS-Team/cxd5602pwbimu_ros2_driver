@@ -9,7 +9,7 @@ def generate_launch_description():
         executable='cxd5602pwbimu_driver_node_exec',
         name='cxd5602pwbimu_driver_node',
         output='screen',
-        parameters=[{'device': '/dev/ttyUSB0'}]
+        parameters=[{'device': '/dev/ttyUSB0', 'baudrate': 1000000}]
     )
 
     imu_filter_node = Node(
@@ -17,7 +17,7 @@ def generate_launch_description():
         executable='imu_filter_madgwick_node',
         name='imu_filter_madgwick_node',
         output='screen',
-        parameters=[{'use_mag': False}]
+        parameters=[{'use_mag': False, 'remove_gravity_vector': True}]
     )
 
     rviz_node = Node(

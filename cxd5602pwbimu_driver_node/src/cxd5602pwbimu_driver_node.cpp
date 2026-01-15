@@ -13,69 +13,117 @@ Cxd5602pwbimuDriverNode::Cxd5602pwbimuDriverNode(const rclcpp::NodeOptions & opt
 : rclcpp::Node("imu_publisher", options),
   port_handler_(this->declare_parameter<std::string>("dev", "/dev/ttyUSB0")),
   time_offset_(0),
-  delimiter_(this->declare_parameter<char>("delimiter", '\n'))
+  delimiter_(this->declare_parameter<char>("delimiter", '\n')),
+  start_byte_(this->declare_parameter<char>("start_byte", 'X')),
+  running_(true)
 {
   const int baudrate = this->declare_parameter<int>("baudrate", 115200);
   const int timeout_ms = this->declare_parameter<int>("timeout_ms", 100);
-  const int spin_ms = this->declare_parameter<int>("spin_ms", 1);
 
   imu_ = std::make_unique<ImuClass>();
-  publisher_ = this->create_publisher<sensor_msgs::msg::Imu>(
-    "/imu/data_raw", rclcpp::SensorDataQoS());
+  publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("/imu/data_raw", rclcpp::SensorDataQoS());
+  temp_publisher_ = this->create_publisher<sensor_msgs::msg::Temperature>("/imu/temperature", rclcpp::SensorDataQoS());
 
-  if (!this->port_handler_.configure(baudrate, timeout_ms)) {
-    RCLCPP_ERROR(this->get_logger(), "Failed to configure serial port");
+  if (!port_handler_.configure(baudrate, timeout_ms)) {
+    RCLCPP_ERROR(get_logger(), "Failed to configure serial port");
     exit(EXIT_FAILURE);
   }
 
-  if (!this->port_handler_.open()) {
-    RCLCPP_ERROR(this->get_logger(), "Failed to open serial port");
+  if (!port_handler_.open()) {
+    RCLCPP_ERROR(get_logger(), "Failed to open serial port");
     exit(EXIT_FAILURE);
   }
 
-  this->timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(spin_ms), std::bind(&Cxd5602pwbimuDriverNode::timerCallback, this));
+  RCLCPP_INFO(get_logger(), "Serial port opened successfully");
+  startSerialThread();
 }
 
 Cxd5602pwbimuDriverNode::~Cxd5602pwbimuDriverNode()
 {
-  this->port_handler_.close();
+  running_ = false;
+  if (recv_thread_.joinable()) {
+    recv_thread_.join();
+  }
+  port_handler_.close();
 }
 
-void Cxd5602pwbimuDriverNode::timerCallback()
+void Cxd5602pwbimuDriverNode::startSerialThread()
 {
-  this->timer_->cancel();
+  recv_thread_ = std::thread([this]() {
+    std::string buf;
+    buf.reserve(39);
+    char c;
 
-  std::stringstream ss;
-  this->port_handler_.readUntil(ss, delimiter_);
+    while (running_) {
+        int n = port_handler_.read(&c, 1);
+        if (n != 1) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            continue;
+        }
 
-  std::string buffer = ss.str();
+        buf.push_back(c);
 
-  if (imu_->set_data(reinterpret_cast<const uint8_t *>(buffer.c_str()), buffer.size())) {
-    auto [linear_acceleration, angular_velocity, sec, msec] = imu_->get_data();
+        if (buf.front() != start_byte_) {
+            buf.erase(buf.begin());
+            continue;
+        }
 
-    auto msg = std::make_unique<sensor_msgs::msg::Imu>();
-
-    if (time_offset_ == 0) {
-      time_offset_ = static_cast<uint32_t>(std::time(nullptr));
+        if (buf.size() == 39) {
+            if (buf.back() == delimiter_) {
+                processPacket(reinterpret_cast<const uint8_t*>(buf.data()), buf.size());
+            } else {
+                char skip;
+                do {
+                    if (port_handler_.read(&skip, 1) != 1) break;
+                    RCLCPP_DEBUG(get_logger(), "Skipping byte: %c %d", skip, skip==delimiter_);
+                } while (skip != delimiter_);
+                RCLCPP_WARN_THROTTLE(get_logger(), *this->get_clock(), 5000, "Resynchronized at delimiter");
+            }
+            buf.clear();
+        }
     }
 
-    msg->header.frame_id = "imu";
-    msg->header.stamp.sec = sec + time_offset_;
-    msg->header.stamp.nanosec = msec * 1000000;
+  });
+}
 
-    msg->linear_acceleration.x = linear_acceleration[0];
-    msg->linear_acceleration.y = linear_acceleration[1];
-    msg->linear_acceleration.z = linear_acceleration[2];
-
-    msg->angular_velocity.x = angular_velocity[0] * 0.5;
-    msg->angular_velocity.y = angular_velocity[1] * 0.5;
-    msg->angular_velocity.z = angular_velocity[2] * 0.5;
-
-    publisher_->publish(std::move(msg));
+void Cxd5602pwbimuDriverNode::processPacket(const uint8_t* data, size_t size)
+{
+  if (!imu_->set_data(data, size)) {
+    RCLCPP_WARN(get_logger(), "Failed to parse IMU data");
+    return;
   }
 
-  this->timer_->reset();
+  auto [linear_acc, angular_vel, temperature, sec, msec] = imu_->get_data();
+
+  auto msg = sensor_msgs::msg::Imu();
+
+  if (time_offset_ == 0) {
+    time_offset_ = static_cast<uint32_t>(std::time(nullptr));
+  }
+
+  msg.header.frame_id = "imu";
+  msg.header.stamp.sec = sec + time_offset_;
+  msg.header.stamp.nanosec = msec * 1000000;
+
+  msg.linear_acceleration.x = -linear_acc[0];
+  msg.linear_acceleration.y = -linear_acc[1];
+  msg.linear_acceleration.z = linear_acc[2];
+
+  msg.angular_velocity.x = -angular_vel[0] * 0.5;
+  msg.angular_velocity.y = -angular_vel[1] * 0.5;
+  msg.angular_velocity.z = angular_vel[2] * 0.5;
+
+  msg.orientation_covariance[0] = -1;
+  msg.linear_acceleration_covariance[0] = -1;
+  msg.angular_velocity_covariance[0] = -1;
+
+  publisher_->publish(msg);
+
+  auto temp_msg = sensor_msgs::msg::Temperature();
+  temp_msg.header = msg.header;
+  temp_msg.temperature = temperature;
+  temp_msg.variance = -1;
+  temp_publisher_->publish(temp_msg);
 }
 
 }
